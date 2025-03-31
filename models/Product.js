@@ -17,32 +17,55 @@ const ProductSchema = new mongoose.Schema({
     required: [true, 'Please add a price'],
     min: [0, 'Price must be at least 0']
   },
+  discountPrice: {
+    type: Number,
+    default: 0
+  },
   quantity: {
     type: Number,
     required: [true, 'Please add a quantity'],
     min: [0, 'Quantity must be at least 0'],
     default: 0
   },
+  image : Buffer, 
   category: {
     type: String,
     required: [true, 'Please add a category'],
-    enum: ['Electronics', 'Clothing', 'Food', 'Books', 'Other']
+    enum: ['Electronics', 'Clothing', 'Food', 'Books', 'Home', 'Beauty', 'Sports', 'Other']
   },
-  sku: {
-    type: String,
-    required: [true, 'Please add a SKU'],
-    unique: true,
-    trim: true
+  subcategory: {
+    type: String
   },
-  imageUrl: {
-    type: String,
-    default: 'no-image.jpg'
+  rating: {
+    type: Number,
+    default: 0,
+    min: [0, 'Rating must be at least 0'],
+    max: [5, 'Rating cannot be more than 5']
   },
-  createdBy: {
+  numReviews: {
+    type: Number,
+    default: 0
+  },
+  seller: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
+  reviews: [
+    {
+      user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+      },
+      name: String,
+      rating: Number,
+      comment: String,
+      date: {
+        type: Date,
+        default: Date.now
+      }
+    }
+  ],
   createdAt: {
     type: Date,
     default: Date.now

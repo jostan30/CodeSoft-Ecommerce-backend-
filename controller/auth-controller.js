@@ -13,7 +13,7 @@ const generateToken = (id) => {
 // @access  Public
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role,address , phone } = req.body;
 
     // Check if user already exists
     const userExists = await User.findOne({ email });
@@ -25,13 +25,24 @@ exports.register = async (req, res) => {
       });
     }
 
+    // Only allow customer role for public registration
+    // Admin can later upgrade to seller
+    const userRole = role === 'seller' && req.body.storeInfo ? 'seller' : 'customer';
+
     // Create user
     const user = await User.create({
       name,
       email,
       password,
-      role: role || 'user'
+      role: userRole ,
+      address:address ,
+      phone:phone
     });
+
+    // Add store info if seller
+    if (userRole === 'seller' && req.body.storeInfo) {
+      userData.storeInfo = req.body.storeInfo;
+    }
 
     // Generate token
     const token = generateToken(user._id);
@@ -43,7 +54,10 @@ exports.register = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        address: user.address,
+        phone: user.phone,
+        storeInfo: user.storeInfo
       }
     });
   } catch (error) {
@@ -99,7 +113,10 @@ exports.login = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        address: user.address,
+        phone: user.phone,
+        storeInfo: user.storeInfo
       }
     });
   } catch (error) {
@@ -123,7 +140,152 @@ exports.getMe = async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
-        role: user.role
+        role: user.role,
+        address: user.address,
+        phone: user.phone,
+        avatar: user.avatar,
+        storeInfo: user.storeInfo
+      }
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// @desc    Update user profile
+// @route   PUT /api/auth/updateprofile
+// @access  Private
+exports.updateProfile = async (req, res) => {
+  try {
+    const { name, address, phone } = req.body;
+    
+    const updateData = {};
+    if (name) updateData.name = name;
+    if (address) updateData.address = address;
+    if (phone) updateData.phone = phone;
+
+    // If user is seller, allow updating store info
+    if (req.user.role === 'seller' && req.body.storeInfo) {
+      updateData.storeInfo = req.body.storeInfo;
+    }
+
+    const user = await User.findByIdAndUpdate(req.user.id, updateData, {
+      new: true,
+      runValidators: true
+    });
+
+    res.status(200).json({
+      success: true,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        address: user.address,
+        phone: user.phone,
+        storeInfo: user.storeInfo
+      }
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// @desc    Change password
+// @route   PUT /api/auth/changepassword
+// @access  Private
+exports.changePassword = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+
+    // Validate current and new password
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide current and new password'
+      });
+    }
+
+    // Get user with password
+    const user = await User.findById(req.user.id).select('+password');
+
+    // Check if current password matches
+    const isMatch = await user.matchPassword(currentPassword);
+
+    if (!isMatch) {
+      return res.status(401).json({
+        success: false,
+        message: 'Current password is incorrect'
+      });
+    }
+
+    // Update password
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: 'Password updated successfully'
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message
+    });
+  }
+};
+
+// @desc    Become a seller (upgrade from customer)
+// @route   PUT /api/auth/become-seller
+// @access  Private (customer only)
+exports.becomeSeller = async (req, res) => {
+  try {
+    const { storeName, description } = req.body;
+
+    if (!storeName) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide a store name'
+      });
+    }
+
+    // Check if user is a customer
+    if (req.user.role !== 'customer') {
+      return res.status(400).json({
+        success: false,
+        message: 'Only customers can upgrade to seller accounts'
+      });
+    }
+
+    // Update user to seller
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      {
+        role: 'seller',
+        storeInfo: {
+          storeName,
+          description: description || '',
+          logo: 'default-store-logo.jpg'
+        }
+      },
+      { new: true }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: 'Successfully upgraded to seller account',
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        storeInfo: user.storeInfo
       }
     });
   } catch (error) {

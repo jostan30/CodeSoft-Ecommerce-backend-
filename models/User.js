@@ -24,8 +24,25 @@ const UserSchema = new mongoose.Schema({
       },
       role: {
         type: String,
-        enum: ['user', 'admin'],
-        default: 'user'
+        enum: ['customer', 'seller', 'admin'],
+        default: 'customer'
+      },
+      address: {
+        street: String,
+        city: String,
+        state: String,
+        zipCode: String,
+        country: String
+      },
+      phone: {
+        type: String,
+        minlength: [10, 'Phone number must be exactly 10 digits'],
+        maxlength: [10, 'Phone number must be exactly 10 digits'],
+        match: [/^\d{10}$/, 'Phone number must be 10 digits'] 
+      },
+      storeInfo: {
+        storeName: String,
+        description: String,
       },
       createdAt: {
         type: Date,
