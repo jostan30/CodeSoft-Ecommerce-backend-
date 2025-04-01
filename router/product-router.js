@@ -1,11 +1,10 @@
 const express = require('express');
 const {
   getProducts,
-  getProduct,
+  getProductById ,
   createProduct,
   updateProduct,
-  deleteProduct,
-  getProductStats
+  deleteProduct
 } = require('../controller/product-controller');
 
 const { protect, authorize } = require('../middleware/authMidlleware');
@@ -19,11 +18,11 @@ router.route('/')
   .get(getProducts)
   .post(createProduct);
 
-router.route('/stats')
-  .get(authorize('admin'), getProductStats);
+// router.route('/stats')
+//   .get(authorize('admin'), getProductStats);
 
 router.route('/:id')
-  .get(getProduct)
+  .get(getProductById )
   .put(updateProduct)
   .delete(deleteProduct);
 
