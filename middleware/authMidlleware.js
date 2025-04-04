@@ -2,9 +2,8 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 // Protect routes
-exports.protect = async (req, res, next) => {
+const protect = async (req, res, next) => {
   let token;
-
   if (
     req.headers.authorization &&
     req.headers.authorization.startsWith('Bearer')
@@ -37,8 +36,8 @@ exports.protect = async (req, res, next) => {
   }
 };
 
-// Grant access to specific roles
-exports.authorize = (...roles) => {
+// // Grant access to specific roles
+const authorize = (...roles) => {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       return res.status(403).json({
@@ -51,7 +50,7 @@ exports.authorize = (...roles) => {
 };
 
 // Check if user is seller of the product
-exports.checkProductOwnership = async (req, res, next) => {
+const checkProductOwnership = async (req, res, next) => {
   try {
     const Product = require('../models/Product');
     const product = await Product.findById(req.params.id);
@@ -86,7 +85,7 @@ exports.checkProductOwnership = async (req, res, next) => {
 };
 
 // Check if user is customer who placed the order
-exports.checkOrderOwnership = async (req, res, next) => {
+const checkOrderOwnership = async (req, res, next) => {
   try {
     const Order = require('../models/Order');
     const order = await Order.findById(req.params.id);
@@ -118,4 +117,12 @@ exports.checkOrderOwnership = async (req, res, next) => {
       message: 'Server error while checking permissions'
     });
   }
+};
+
+
+module.exports = {
+  protect,
+  authorize,
+  checkProductOwnership,
+  checkOrderOwnership
 };
