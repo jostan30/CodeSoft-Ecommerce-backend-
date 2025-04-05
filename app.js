@@ -7,6 +7,7 @@ const connectDB =require('./utils/db');
 const authRoutes = require('./router/auth-router');
 const productRoutes = require('./router/product-router');
 const orderRoutes = require('./router/order-router');
+const paymentRoutes = require('./router/payment-router');
 
 const port = process.env.PORT || 5050;
 const app = express();
@@ -27,7 +28,8 @@ app.use(express.json());
 app.use('/api/auth' ,authRoutes);
 app.use('/api/products' ,productRoutes);
 app.use('/api/orders' ,orderRoutes);
-// app.use('/api/orders' ,orderRoutes);
+app.use('/api/payments' ,paymentRoutes);
+
 
 
 connectDB().then(()=>{
