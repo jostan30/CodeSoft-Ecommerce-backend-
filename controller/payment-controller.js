@@ -24,7 +24,7 @@ const createRazorpayOrder = async (req, res) => {
     };
 
     const order = await razorpay.orders.create(options);
-    console.log(order);
+    // console.log(order);
     if (!order) {
       return res.status(500).json({ msg: 'Error creating Razorpay order' });
     }
@@ -47,7 +47,6 @@ const verifyRazorpayPayment = async (req, res) => {
       orderId 
     } = req.body;
 
-    console.log(req.body);
     // Verify signature
     const body = razorpay_order_id + '|' + razorpay_payment_id;
     const expectedSignature = crypto
@@ -67,8 +66,7 @@ const verifyRazorpayPayment = async (req, res) => {
     if (!order) {
       return res.status(404).json({ msg: 'Order not found' });
     }
-    console.log("done");
-
+   
     order.isPaid = true;
     order.paidAt = Date.now();
     order.paymentResult = {
