@@ -13,10 +13,9 @@ const generateToken = (id) => {
 // @access  Public
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, role,address , phone } = req.body;
-
+    const { name, email, password, address , phone } = req.body;
     // Check if user already exists
-    const userExists = await User.findOne({ email });
+    const userExists = await User.findOne({ email:email });
 
     if (userExists) {
       return res.status(400).json({
@@ -25,24 +24,15 @@ exports.register = async (req, res) => {
       });
     }
 
-    // Only allow customer role for public registration
-    // Admin can later upgrade to seller
-    const userRole = role === 'seller' && req.body.storeInfo ? 'seller' : 'customer';
-
     // Create user
     const user = await User.create({
       name,
       email,
       password,
-      role: userRole ,
+      role: "customer" ,
       address:address ,
       phone:phone
     });
-
-    // Add store info if seller
-    if (userRole === 'seller' && req.body.storeInfo) {
-      userData.storeInfo = req.body.storeInfo;
-    }
 
     // Generate token
     const token = generateToken(user._id);
@@ -133,7 +123,12 @@ exports.login = async (req, res) => {
 exports.getMe = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
-
+    if(!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'User not found'
+      });
+    }
     res.status(200).json({
       success: true,
       user: {
@@ -247,7 +242,6 @@ exports.changePassword = async (req, res) => {
 exports.becomeSeller = async (req, res) => {
   try {
     const { storeName, description } = req.body;
-
     if (!storeName) {
       return res.status(400).json({
         success: false,

@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const {  createRazorpayOrder,verifyRazorpayPayment,getRazorpayKey} = require('../controller/payment-controller');
-const {authorize , protect} = require('../middleware/authMidlleware');
+const { protect} = require('../middleware/authMidlleware');
 
+
+router.use(protect);
 
 // @route   POST api/payment/create-order
 // @desc    Create Razorpay order
