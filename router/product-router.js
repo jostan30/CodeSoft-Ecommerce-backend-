@@ -1,4 +1,7 @@
 const express = require('express');
+const multer = require('multer');
+const upload = multer();
+
 const {
   getProducts,
   getProductById ,
@@ -15,7 +18,7 @@ const router = express.Router();
 router.use(protect);
 
 router.route('/').get(getProducts)
-router.post('/', protect, authorize('seller'), createProduct);
+router.post('/', upload.single('image'), protect, authorize('seller'), createProduct);
 
 // router.route('/stats')
 //   .get(authorize('admin'), getProductStats);

@@ -1,11 +1,22 @@
 const Product = require('../models/Product');
+const mongoose = require('mongoose');
 
 // @desc    Get all products
 // @access  Public
 exports.getProducts = async (req, res) => {
   try {
     const products = await Product.find().sort({ date: -1 });
-    return res.status(200).json(products);
+
+    // Convert image buffer to base64 string for JSON response
+    const productData = products.map((product) => ({
+      ...product.toObject(),
+      image: product.image?.toString("base64") || null,
+    }));
+
+    return res.status(200).json({
+      success: true,
+      data: productData
+    });
   } catch (err) {
     console.error(err.message);
     return res.status(500).send('Server Error');
@@ -39,6 +50,15 @@ exports.createProduct = async (req, res) => {
     // Add user to req.body
     req.body.seller = req.user.id;
 
+    // Convert numeric fields from string to number
+    req.body.price = parseFloat(req.body.price);
+    req.body.quantity = parseInt(req.body.quantity);
+    req.body.discountPrice = parseFloat(req.body.discountPrice || 0);
+
+    if (req.file?.buffer) {
+      req.body.image = req.file.buffer;
+    }
+    console.log("Received Body:", req.body);
     const product = await Product.create(req.body);
 
     res.status(201).json({
@@ -69,13 +89,13 @@ exports.updateProduct = async (req, res) => {
       return res.status(401).json({ msg: 'Admin access required' });
     }
 
-    const { name, description, price, category, image, countInStock,quantity,discountPrice ,subcategory} = req.body;
+    const { name, description, price, category, image, countInStock, quantity, discountPrice, subcategory } = req.body;
 
     if (name) product.name = name;
     if (description) product.description = description;
     if (price) product.price = price;
     if (category) product.category = category;
-    if (subcategory) product.subcategory =subcategory;
+    if (subcategory) product.subcategory = subcategory;
     if (image) product.image = image;
     if (discountPrice) product.discountPrice = discountPrice;
     if (quantity) product.quantity = quantity;
@@ -97,8 +117,18 @@ exports.updateProduct = async (req, res) => {
 // @access  Private
 exports.deleteProduct = async (req, res) => {
   try {
-    const seller= req.user.id;
-    const product = await Product.findById(req.params.id);
+    const { id } = req.params;
+    const seller = req.user.id;
+
+    // Validate ID
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid product ID',
+      });
+    }
+
+    const product = await Product.findById(id);
 
     if (!product) {
       return res.status(404).json({
