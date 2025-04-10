@@ -25,7 +25,7 @@ router.post('/', upload.single('image'), protect, authorize('seller'), createPro
 
 router.route('/:id')
   .get(getProductById )
-  .put(protect ,authorize('seller') ,updateProduct)
+  .put( upload.single('image') ,protect ,authorize('seller') ,updateProduct)
   .delete(protect,authorize('seller'),deleteProduct);
 
 

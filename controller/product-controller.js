@@ -32,7 +32,9 @@ exports.getProductById = async (req, res) => {
     if (!product) {
       return res.status(404).json({ msg: 'Product not found' });
     }
-    res.json(product);
+    res.json({
+      status:true,
+      data:product});
   } catch (err) {
     console.error(err.message);
     if (err.kind === 'ObjectId') {
@@ -58,7 +60,7 @@ exports.createProduct = async (req, res) => {
     if (req.file?.buffer) {
       req.body.image = req.file.buffer;
     }
-    console.log("Received Body:", req.body);
+    
     const product = await Product.create(req.body);
 
     res.status(201).json({
@@ -79,34 +81,42 @@ exports.updateProduct = async (req, res) => {
   try {
     const seller = req.user.id;
     const product = await Product.findById(req.params.id);
-
     if (!product) {
       return res.status(404).json({ msg: 'Product not found' });
     }
 
+
     // Check if authentic
     if (seller !== product.seller.toString()) {
       return res.status(401).json({ msg: 'Admin access required' });
+    }
+    if (req.file?.buffer) {
+      req.body.image = req.file.buffer;
     }
 
     const { name, description, price, category, image, countInStock, quantity, discountPrice, subcategory } = req.body;
 
     if (name) product.name = name;
     if (description) product.description = description;
-    if (price) product.price = price;
+    if (price) product.price = parseFloat(price);
     if (category) product.category = category;
     if (subcategory) product.subcategory = subcategory;
-    if (image) product.image = image;
-    if (discountPrice) product.discountPrice = discountPrice;
-    if (quantity) product.quantity = quantity;
+    if (discountPrice) product.discountPrice = parseFloat(discountPrice);
+    if (quantity) product.quantity = parseInt(quantity);
     if (countInStock !== undefined) product.countInStock = countInStock;
+    if (image) product.image = image;
 
     await product.save();
-    res.json(product);
+    res.status(201).json({
+      success: true,
+    });
   } catch (err) {
     console.error(err.message);
     if (err.kind === 'ObjectId') {
-      return res.status(404).json({ msg: 'Product not found' });
+      return res.status(404).json({ 
+        success: false,
+        msg: 'Product not found'
+      });
     }
     res.status(500).send('Server Error');
   }
