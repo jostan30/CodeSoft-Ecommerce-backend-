@@ -7,7 +7,8 @@ const {
   getProductById ,
   createProduct,
   updateProduct,
-  deleteProduct
+  deleteProduct,
+  getSellerProducts
 } = require('../controller/product-controller');
 
 const { protect, authorize } = require('../middleware/authMidlleware');
@@ -18,14 +19,15 @@ const router = express.Router();
 router.use(protect);
 
 router.route('/').get(getProducts)
-router.post('/', upload.single('image'), protect, authorize('seller'), createProduct);
+router.post('/', upload.single('image'), authorize('seller'), createProduct);
+router.get('/userproduct', authorize('seller'),getSellerProducts );
 
 // router.route('/stats')
 //   .get(authorize('admin'), getProductStats);
 
 router.route('/:id')
   .get(getProductById )
-  .put( upload.single('image') ,protect ,authorize('seller') ,updateProduct)
+  .put( upload.single('image') ,authorize('seller') ,updateProduct)
   .delete(protect,authorize('seller'),deleteProduct);
 
 

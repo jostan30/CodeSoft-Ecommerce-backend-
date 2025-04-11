@@ -8,7 +8,6 @@ exports.createOrder = async (req, res) => {
       const {
         orderItems,
         shippingAddress,
-        paymentMethod,
         taxPrice,
         shippingPrice,
         totalPrice
@@ -23,14 +22,16 @@ exports.createOrder = async (req, res) => {
         user: req.user.id,
         orderItems,
         shippingAddress,
-        paymentMethod,
         taxPrice,
         shippingPrice,
         totalPrice
       });
   
       const createdOrder = await order.save();
-      res.status(201).json(createdOrder);
+      res.status(201).json({
+        success:true,
+        data:createdOrder
+      });
     } catch (err) {
       console.error(err.message);
       res.status(500).send('Server Error');

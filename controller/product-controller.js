@@ -75,6 +75,31 @@ exports.createProduct = async (req, res) => {
   }
 };
 
+// @desc    Get all products
+// @access  Private
+exports.getSellerProducts = async (req, res) => {
+  try {
+    const seller  = req.user.id;
+    const products = await Product.find().sort({ date: -1 });
+
+    const SellerProducts = products.filter((product) => product.seller.toString() === seller.toString());
+
+    // Convert image buffer to base64 string for JSON response
+    const productData = SellerProducts.map((product) => ({
+      ...product.toObject(),
+      image: product.image?.toString("base64") || null,
+    }));
+
+    return res.status(200).json({
+      success: true,
+      data: productData
+    });
+  } catch (err) {
+    console.error(err.message);
+    return res.status(500).send('Server Error');
+  }
+};
+
 // @desc    Update a product
 // @access  Private (Admin only)
 exports.updateProduct = async (req, res) => {
@@ -168,6 +193,7 @@ exports.deleteProduct = async (req, res) => {
     });
   }
 };
+
 
 // @desc    Get product statistics
 // @route   GET /api/products/stats
