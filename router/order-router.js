@@ -5,6 +5,7 @@ const {
     getOrderById,
     getUserOrders,
     getAllOrders,
+    geSellerOrders,
     updateOrderToDelivered
   } = require('../controller/order-controller');
   const {protect,authorize} = require('../middleware/authMidlleware');
@@ -26,6 +27,11 @@ const {
   // @desc    Get logged in user's orders
   // @access  Private
   router.get('/',getUserOrders);
+
+   // @route   GET api/orders
+  // @desc    Get logged in user's orders
+  // @access  Private
+  router.get('/sellerOrder', authorize('seller'),geSellerOrders);
   
   // @route   GET api/orders/admin/all
   // @desc    Get all orders
