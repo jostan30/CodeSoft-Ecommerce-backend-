@@ -81,16 +81,17 @@ exports.getSellerOrders = async (req, res) => {
     const allOrders = await Order.find()
     .populate({
       path: 'orderItems.product',
-      model: 'product',
+      model: 'Product',
       select: 'seller name price', // only fetch necessary fields
     });
-
+    
      // Filter orders where at least one product belongs to the current seller
      const sellerOrders = allOrders.filter(order => {
       return order.orderItems.some(item => {
-        return item.product && item.product.seller.toString() === seller;
+        return item.product && item.product.seller.toString() === seller.toString();
       });
     });
+
 
     return res.json(sellerOrders);
   } catch (err) {
