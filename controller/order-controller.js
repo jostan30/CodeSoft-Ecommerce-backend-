@@ -92,10 +92,10 @@ exports.getSellerOrders = async (req, res) => {
       });
     });
 
-    res.json(sellerOrders);
+    return res.json(sellerOrders);
   } catch (err) {
     console.error(err.message);
-    res.status(500).send('Server Error');
+    return res.status(500).send('Server Error');
   }
 };
 
