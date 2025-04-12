@@ -88,7 +88,7 @@ exports.getSellerOrders = async (req, res) => {
      // Filter orders where at least one product belongs to the current seller
      const sellerOrders = allOrders.filter(order => {
       return order.orderItems.some(item => {
-        return item.product && item.product.seller.toString() === sellerId;
+        return item.product && item.product.seller.toString() === seller;
       });
     });
 
