@@ -14,7 +14,7 @@ const app = express();
 
 //Midlleware
 const corsOptions = {
-    origin: process.env.FRONTEND_URL || 'http://localhost:3000', // Your Next.js app URL
+    origin: process.env.FRONTEND_URL || 'https://code-soft-ecommerce-frontend.vercel.app/', 
     credentials: true,                // Allow cookies and authentication headers
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
