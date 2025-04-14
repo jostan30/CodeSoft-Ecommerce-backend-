@@ -12,9 +12,10 @@ const paymentRoutes = require('./router/payment-router');
 const port = process.env.PORT || 5050;
 const app = express();
 
+
 //Midlleware
 const corsOptions = {
-    origin: process.env.FRONTEND_URL || 'https://code-soft-ecommerce-frontend.vercel.app/', 
+    origin: [process.env.FRONTEND_URL , 'http://localhost:3000'], 
     credentials: true,                // Allow cookies and authentication headers
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
